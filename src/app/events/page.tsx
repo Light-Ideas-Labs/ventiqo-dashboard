@@ -3,15 +3,12 @@
 import { useEffect, useRef, useState, useMemo } from "react";
 import mapboxgl from "mapbox-gl"; // Import Mapbox GL
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardTitle,} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { MapPin, Calendar, Search, Music, Palette, Dribbble, Heart } from "lucide-react"; // Icons for event details and categories
 import { createRoot } from "react-dom/client";
+import Image from "next/image";
+import { getAllEvents } from "@/config/eventsAPI"; // Import the API
 
 // Add your Mapbox access token here
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAP_BOX_ACCESS_TOKEN || "";
@@ -87,47 +84,63 @@ export default function ExploreEvents() {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null); // Initialize mapRef with null
   const markersRef = useRef<mapboxgl.Marker[]>([]); // Array to store markers
-
-// Updated Dummy event data with eventType field and calculated distances
-const eventsToday = useMemo((): Event[] => [
-  {
-    title: "Mental Health Awareness",
-    location: "Parklands, 1st Avenue",
-    time: "5:00pm - 8:00pm EAT",
-    image: "/mental_health_event.jpg",
-    isFree: true,
-    coordinates: [36.819, -1.286], // Nairobi coordinates
-    eventType: "health",
-    distance: calculateDistance(nairobiCBD[1], nairobiCBD[0], -1.286, 36.819),
-  },
-  {
-    title: "Introduction to Polkadot",
-    location: "Parklands, 1st Avenue",
-    time: "5:00pm - 6:00pm EAT",
-    image: "/tech_event.jpg",
-    isFree: true,
-    coordinates: [36.822, -1.285],
-    eventType: "tech",
-    distance: calculateDistance(nairobiCBD[1], nairobiCBD[0], -1.285, 36.822),
-  },
-  {
-    title: "Live Jazz Concert",
-    location: "Westlands",
-    time: "8:00pm - 11:00pm EAT",
-    image: "/jazz_event.jpg",
-    isFree: false,
-    price: "$30",
-    coordinates: [36.800, -1.268],
-    eventType: "music",
-    distance: calculateDistance(nairobiCBD[1], nairobiCBD[0], -1.268, 36.800),
-  },
-], []);
-
+  const [eventsToday, setEventsToday] = useState<any[]>([]); // Store fetched events
   const [viewport, setViewport] = useState({
     longitude: 36.819,
     latitude: -1.286,
     zoom: 12,
   });
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const response = await getAllEvents(); // Fetch events from your API
+        console.log("all events", response);
+  
+        // Check if the response is valid and contains events
+        if (response && response.success && Array.isArray(response.events.data) && response.events.data.length > 0) {
+          const formattedEvents = response.events.data.map((event: any) => {
+            // Ensure required fields exist in the event data
+            const hasCoordinates = event.coordinates && event.coordinates.longitude && event.coordinates.latitude;
+            const hasRequiredFields = event.title && event.venueName && event.startTime && event.endTime;
+  
+            if (hasCoordinates && hasRequiredFields) {
+              return {
+                title: event.title,
+                location: event.venueName,
+                time: `${event.startTime} - ${event.endTime} ${event.timeZone}`,
+                image: event.image?.[0] || '/event_image_placeholder.jpg', // Get the first image from the array, fallback to placeholder
+                coordinates: [event.coordinates.longitude, event.coordinates.latitude],
+                eventType: event.categoryName?.toLowerCase() as keyof typeof eventIcons,
+                distance: calculateDistance(
+                  nairobiCBD[1],
+                  nairobiCBD[0],
+                  event.coordinates.latitude,
+                  event.coordinates.longitude
+                ),
+                isFree: event.isFree ?? false, // Default to false if isFree is not defined
+                price: event.price ?? 'Not Available',
+              };
+            } else {
+              console.warn("Event is missing required data", event);
+              return null; // Skip events missing required fields
+            }
+          }).filter(event => event !== null); // Remove null entries
+  
+          setEventsToday(formattedEvents);
+        } else {
+          console.error("Error: No events data found or data format is incorrect.");
+        }
+      } catch (error) {
+        console.error("Error fetching events:", error);
+      }
+    };
+  
+    fetchEvents();
+  }, []);
+  
+
+  
 
  // Initialize the map
  useEffect(() => {
@@ -250,38 +263,41 @@ const eventsToday = useMemo((): Event[] => [
       {/* Floating Cards Section */}
       <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black via-transparent to-transparent p-6">
         <section className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {eventsToday.map((event: Event, idx: number) => (
-            <Card key={idx} className="bg-white p-2 shadow-lg">
-              <div className="relative">
-                <img
-                  src={event.image}
-                  alt={event.title}
-                  className="h-40 w-full rounded-lg object-cover"
-                />
-              </div>
-              <CardContent>
-                <CardTitle className="text-lg font-bold">
-                  {event.title}
-                </CardTitle>
-                <div className="mt-2 flex items-center text-sm text-gray-500">
-                  <MapPin className="mr-1 h-4 w-4" />
-                  <span>{event.location}</span>
-                </div>
-                <div className="mt-2 text-sm text-gray-500">
-                  <Calendar className="mr-1 h-4 w-4" />
-                  {event.time}
-                </div>
-                <div className="mt-2 font-semibold text-green-600">
-                  {event.isFree ? "Free" : event.price}
-                </div>
-              </CardContent>
-              <CardFooter className="mt-4 flex justify-between">
-                <Button variant="outline">RSVP</Button>
-                <Button variant="outline">Share</Button>
-                <Button variant="outline">Save</Button>
-              </CardFooter>
-            </Card>
-          ))}
+{eventsToday.map((event: Event, idx: number) => (
+  <Card key={idx} className="bg-white p-1 shadow-md w-64"> {/* Adjusted the card padding and width */}
+    <div className="relative">
+      <Image
+        src={event.image}
+        alt={event.title}
+        width={300}  // Set the image width
+        height={80}  // Set the image height
+        className="w-full h-32 object-cover rounded-md" // Adjusted for a smaller image size
+      />
+    </div>
+    <CardContent className="p-2"> {/* Adjusted content padding */}
+      <CardTitle className="text-md font-semibold"> {/* Adjusted font size */}
+        {event.title}
+      </CardTitle>
+      <div className="mt-1 flex items-center text-xs text-gray-500"> {/* Smaller font size */}
+        <MapPin className="mr-1 h-3 w-3" /> {/* Smaller icon */}
+        <span>{event.location}</span>
+      </div>
+      <div className="mt-1 text-xs text-gray-500"> {/* Smaller font size */}
+        <Calendar className="mr-1 h-3 w-3" /> {/* Smaller icon */}
+        {event.time}
+      </div>
+      <div className="mt-1 text-sm font-semibold text-green-600">
+        {event.isFree ? "Free" : event.price}
+      </div>
+    </CardContent>
+    <CardFooter className="mt-2 flex justify-between px-2"> {/* Reduced margins */}
+      <Button variant="outline" size="sm">RSVP</Button> {/* Smaller buttons */}
+      <Button variant="outline" size="sm">Share</Button>
+      <Button variant="outline" size="sm">Save</Button>
+    </CardFooter>
+  </Card>
+))}
+
         </section>
       </div>
     </div>

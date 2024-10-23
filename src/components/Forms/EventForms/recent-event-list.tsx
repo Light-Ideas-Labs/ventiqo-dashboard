@@ -76,13 +76,13 @@ const RecentEventList: React.FC = () => {
         {events.map((event) => (
           <div
             key={event._id}
-            className="flex items-center justify-between space-x-2"
+            className="flex items-center justify-between space-x-4"
           >
             {/* Event Image */}
             <Image
               src={event.image || "/images/events/sample.jpg"} // Use event image or default
               alt={event.title}
-              width={80}
+              width={100}
               height={80}
               className="rounded-lg"
             />
@@ -101,7 +101,7 @@ const RecentEventList: React.FC = () => {
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-500 text-white">
                   <DollarSign className="h-5 w-5" />
                 </div>
-                <p className="text-sm font-semibold">${event.price || "N/A"}</p>
+                <p className="text-sm font-semibold">$ {event.price || "N/A"}</p>
               </div>
 
               {/* Tickets Left */}
@@ -109,7 +109,7 @@ const RecentEventList: React.FC = () => {
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-500 text-white">
                   <Ticket className="h-5 w-5" />
                 </div>
-                <p className="text-sm"> {ticketSummaries[event._id]?.totalRemainingTickets ?? "Loading..."}</p>
+                <p className="text-sm"> {ticketSummaries[event._id]?.totalRemainingTickets ?? "Loading..."} pcs left</p>
               </div>
 
               {/* Event Date */}

@@ -5,6 +5,7 @@ declare module 'next-auth' {
     accessToken?: string;
     refreshToken?: string;
     user: {
+      id: string;
       name?: string | null;
       email?: string | null;
       image?: string | null;
@@ -18,10 +19,13 @@ declare module 'next-auth' {
   }
 
   interface User {
+    id: string;
     role?: string;  
     username?: string;
     first_name?: string;
     last_name?: string;
+    phone_number?: string;
+    role?: string;
     // Add your custom properties here
   }
 }

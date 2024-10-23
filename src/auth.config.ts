@@ -146,6 +146,7 @@ const authConfig: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }: any) {
       if (user) {
+        token.sub = user.id
         token.accessToken = user.accessToken;
         token.refreshToken = user.refreshToken;
         token.user = {
@@ -180,6 +181,7 @@ const authConfig: NextAuthOptions = {
     },
     async session({ session, token }: any) {
       session.user = token.user;
+      session.user.id = token.sub; // Include the user.id in the session
       session.accessToken = token.accessToken;
       session.refreshToken = token.refreshToken;
 
@@ -232,7 +234,7 @@ const authConfig: NextAuthOptions = {
   pages: {
     signIn: "/auth/signin",
     signOut: "/auth/signout",
-    verifyRequest: "/auth/verify-request",
+    verifyRequest: "/auth/account-activation",
   },
 };
 

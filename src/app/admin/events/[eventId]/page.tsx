@@ -8,6 +8,7 @@ import { EventDetailsResponse } from '@/types/event';
 import { getEventById } from '@/config/eventsAPI';
 import { ChevronLeft, Home, LineChart, Package, Package2, PanelLeft, PlusCircle, Search, Settings, ShoppingCart, Upload, Users2, } from "lucide-react";
 
+import { Textarea } from "@/components/ui/textarea";
 import Loader from "@/components/common/Loader";
 import { Badge } from "@/components/ui/badge";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator, } from "@/components/ui/breadcrumb";
@@ -18,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/ui/table";
-import { Textarea } from "@/components/ui/textarea";
+
 
 export default function EventDetailsPage({ params }: { params: { eventId: string } }) {
   const router = useRouter();

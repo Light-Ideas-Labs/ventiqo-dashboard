@@ -1,5 +1,14 @@
+import { getSession, signIn } from 'next-auth/react';
 import { VentiqoBackendAPI } from "@/constants/ventiqo-backend-api";
 import { Ticket } from "@/types/event";
+
+// Function to get and refresh the access token if needed
+const getValidAccessToken = async (): Promise<string | undefined> => {
+  const session = await getSession();
+  let accessToken: string | undefined = session?.accessToken ?? undefined; // Use nullish coalescing to ensure `undefined` instead of `null`
+
+  return accessToken; // This will always be a string or undefined
+};
 
 export interface Event {
   _id: string;
@@ -108,7 +117,7 @@ interface dataEventDetails {
   keypoint: string;
   venueName: string;
   categoryName: string;
-  subcatergoryName: string;
+  subcategoryName: string; // Fixing the typo here
   status: string;
   currentBookings: number;
   promoCode: string;
@@ -184,10 +193,14 @@ interface TicketSummaryResponse {
 // create event details
 export const createEvent = async (eventDetails: dataEventDetails) => {
   try {
+
+    const accessToken = await getValidAccessToken();
+
     const res = await fetch(`${VentiqoBackendAPI}/events/create`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        'Authorization': `Bearer ${accessToken}`,
       },
       body: JSON.stringify(eventDetails),
     });
@@ -202,10 +215,14 @@ export const createEvent = async (eventDetails: dataEventDetails) => {
 // Function to add tickets to an event
 export const addTicketsToEvent = async (eventId: string, tickets: Ticket[],): Promise<void> => {
   try {
+
+    const accessToken = await getValidAccessToken();
+
     const res = await fetch(`${VentiqoBackendAPI}/events/${eventId}/tickets`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        'Authorization': `Bearer ${accessToken}`,
       },
       body: JSON.stringify({ tickets }),
     });
