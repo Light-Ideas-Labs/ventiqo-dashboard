@@ -1,0 +1,305 @@
+@import "@uploadthing/react/styles.css" layer(vendor);
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* =========================
+   THEME TOKENS (shadcn)
+========================= */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-geist-mono);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --color-wizard-accent: var(--wizard-accent);
+  --color-wizard-accent-hover: var(--wizard-accent-hover);
+  --color-wizard-accent-foreground: var(--wizard-accent-foreground);
+  --color-wizard-track: var(--wizard-track);
+
+  --color-semantic-error-bg: var(--semantic-error-bg);
+  --color-semantic-error-bg-strong: var(--semantic-error-bg-strong);
+  --color-semantic-error: var(--semantic-error);
+  --color-semantic-error-hover: var(--semantic-error-hover);
+  --color-semantic-error-text: var(--semantic-error-text);
+
+  --color-semantic-success-bg: var(--semantic-success-bg);
+  --color-semantic-success-bg-strong: var(--semantic-success-bg-strong);
+  --color-semantic-success: var(--semantic-success);
+  --color-semantic-success-hover: var(--semantic-success-hover);
+  --color-semantic-success-text: var(--semantic-success-text);
+
+  --color-semantic-warning-bg: var(--semantic-warning-bg);
+  --color-semantic-warning-bg-strong: var(--semantic-warning-bg-strong);
+  --color-semantic-warning: var(--semantic-warning);
+  --color-semantic-warning-hover: var(--semantic-warning-hover);
+  --color-semantic-warning-text: var(--semantic-warning-text);
+
+  --color-semantic-info-bg: var(--semantic-info-bg);
+  --color-semantic-info-bg-strong: var(--semantic-info-bg-strong);
+  --color-semantic-info: var(--semantic-info);
+  --color-semantic-info-hover: var(--semantic-info-hover);
+  --color-semantic-info-text: var(--semantic-info-text);
+
+  --radius: 0.75rem;
+}
+
+/* =========================
+   LIGHT MODE (STYLE GUIDE)
+========================= */
+:root {
+  --background: oklch(0.99 0.00 49);
+  --foreground: oklch(0.15 0.02 53);
+
+  --card: oklch(0.98 0.01 49);
+  --card-foreground: oklch(0.13 0.01 56);
+
+  --popover: oklch(0.98 0.01 49);
+  --popover-foreground: oklch(0.13 0.01 56);
+
+  --primary: oklch(0.78 0.06 48);
+  --primary-foreground: oklch(0.24 0.04 47);
+
+  --secondary: oklch(0.94 0.00 49);
+  --secondary-foreground: oklch(0.44 0.02 48);
+
+  --accent: oklch(0.94 0.00 49);
+  --accent-foreground: oklch(0.44 0.02 48);
+
+  --muted: oklch(0.89 0.02 49);
+  --muted-foreground: oklch(0.37 0.01 48);
+
+  --destructive: oklch(0.34 0.11 34);
+  --destructive-foreground: oklch(0.84 0.07 33);
+
+  --border: oklch(0.95 0.00 49);
+  --input: oklch(0.95 0.00 49);
+  --ring: oklch(0.78 0.06 48);
+
+  /* Sidebar */
+  --sidebar: oklch(0.97 0.01 49);
+  --sidebar-foreground: oklch(0.15 0.02 53);
+
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+
+  --sidebar-accent: oklch(0.92 0.01 49);
+  --sidebar-accent-foreground: var(--foreground);
+
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+
+  /* =========================
+     ORG ONBOARDING WIZARD
+     Scoped accent + semantic colors from the Figma design system.
+     Deliberately not aliased to --primary, so this doesn't
+     re-brand the rest of the app.
+  ========================= */
+  --wizard-accent: oklch(0.53 0.06 240);
+  --wizard-accent-hover: oklch(0.45 0.06 240);
+  --wizard-accent-foreground: oklch(0.99 0.00 240);
+  --wizard-track: oklch(0.91 0.01 240);
+
+  --semantic-error-bg: oklch(0.97 0.02 20);
+  --semantic-error-bg-strong: oklch(0.93 0.05 20);
+  --semantic-error: oklch(0.63 0.22 25);
+  --semantic-error-hover: oklch(0.52 0.20 25);
+  --semantic-error-text: oklch(0.45 0.18 25);
+
+  --semantic-success-bg: oklch(0.97 0.03 155);
+  --semantic-success-bg-strong: oklch(0.93 0.07 155);
+  --semantic-success: oklch(0.65 0.17 155);
+  --semantic-success-hover: oklch(0.52 0.15 155);
+  --semantic-success-text: oklch(0.45 0.13 155);
+
+  --semantic-warning-bg: oklch(0.97 0.03 75);
+  --semantic-warning-bg-strong: oklch(0.92 0.07 75);
+  --semantic-warning: oklch(0.74 0.15 65);
+  --semantic-warning-hover: oklch(0.58 0.14 55);
+  --semantic-warning-text: oklch(0.48 0.13 50);
+
+  --semantic-info-bg: oklch(0.96 0.02 255);
+  --semantic-info-bg-strong: oklch(0.91 0.05 255);
+  --semantic-info: oklch(0.58 0.20 260);
+  --semantic-info-hover: oklch(0.46 0.19 262);
+  --semantic-info-text: oklch(0.42 0.17 262);
+}
+
+/* =========================
+   DARK MODE
+========================= */
+.dark {
+  --background: oklch(0.12 0.02 296);
+  --foreground: oklch(0.98 0.00 296);
+
+  --card: oklch(0.13 0.02 295);
+  --card-foreground: oklch(0.99 0.00 296);
+
+  --popover: oklch(0.12 0.02 296);
+  --popover-foreground: oklch(0.98 0.00 296);
+
+  --primary: oklch(0.51 0.26 282);
+  --primary-foreground: oklch(0.98 0.01 296);
+
+  --secondary: oklch(0.20 0.01 296);
+  --secondary-foreground: oklch(0.74 0.02 296);
+
+  --accent: oklch(0.25 0.02 295);
+  --accent-foreground: oklch(0.78 0.02 296);
+
+  --muted: oklch(0.24 0.01 296);
+  --muted-foreground: oklch(0.68 0.04 295);
+
+  --destructive: oklch(0.62 0.24 11);
+  --destructive-foreground: oklch(1 0 0);
+
+  --border: oklch(0.28 0.03 257);
+  --input: oklch(0.28 0.03 257);
+  --ring: oklch(0.51 0.26 282);
+
+  --sidebar: oklch(0.14 0.02 296);
+  --sidebar-foreground: oklch(0.98 0.00 296);
+
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+
+  --sidebar-accent: oklch(0.24 0.01 296);
+  --sidebar-accent-foreground: var(--foreground);
+
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+
+  --wizard-accent: oklch(0.68 0.07 240);
+  --wizard-accent-hover: oklch(0.76 0.06 240);
+  --wizard-accent-foreground: oklch(0.13 0.02 296);
+  --wizard-track: oklch(0.30 0.02 240);
+
+  --semantic-error-bg: oklch(0.25 0.05 20);
+  --semantic-error-bg-strong: oklch(0.32 0.09 20);
+  --semantic-error: oklch(0.68 0.20 25);
+  --semantic-error-hover: oklch(0.75 0.19 25);
+  --semantic-error-text: oklch(0.82 0.14 25);
+
+  --semantic-success-bg: oklch(0.24 0.05 155);
+  --semantic-success-bg-strong: oklch(0.31 0.09 155);
+  --semantic-success: oklch(0.70 0.16 155);
+  --semantic-success-hover: oklch(0.77 0.15 155);
+  --semantic-success-text: oklch(0.82 0.13 155);
+
+  --semantic-warning-bg: oklch(0.26 0.05 75);
+  --semantic-warning-bg-strong: oklch(0.33 0.09 75);
+  --semantic-warning: oklch(0.78 0.14 65);
+  --semantic-warning-hover: oklch(0.84 0.13 65);
+  --semantic-warning-text: oklch(0.85 0.12 65);
+
+  --semantic-info-bg: oklch(0.24 0.04 255);
+  --semantic-info-bg-strong: oklch(0.31 0.08 255);
+  --semantic-info: oklch(0.70 0.18 260);
+  --semantic-info-hover: oklch(0.77 0.16 260);
+  --semantic-info-text: oklch(0.82 0.12 260);
+}
+
+/* =========================
+   BASE STYLES
+========================= */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    @apply font-sans;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+
+  /* =========================
+     TYPOGRAPHY
+  ========================= */
+  h1 {
+    @apply text-4xl font-semibold tracking-tight;
+  }
+
+  h2 {
+    @apply text-3xl font-semibold tracking-tight;
+  }
+
+  h3 {
+    @apply text-xl font-semibold;
+  }
+
+  h4 {
+    @apply text-lg font-medium;
+  }
+
+  p {
+    @apply text-sm text-muted-foreground;
+  }
+
+  label {
+    @apply text-sm font-medium;
+  }
+}
+
+/* =========================
+   COMPONENT UTILITIES
+========================= */
+
+.card {
+  @apply bg-card border border-border rounded-xl shadow-sm;
+}
+
+.btn-primary {
+  @apply bg-primary text-primary-foreground hover:opacity-90 rounded-xl;
+}
+
+.btn-secondary {
+  @apply border border-border bg-background hover:bg-accent rounded-xl;
+}
+
+.btn-warning {
+  @apply bg-[oklch(0.75_0.18_80)] text-black rounded-xl;
+}
+
+input {
+  @apply rounded-xl border border-input bg-background px-3 py-2 text-sm;
+}
