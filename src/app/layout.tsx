@@ -1,39 +1,32 @@
-"use client";
-
-// import "jsvectormap/dist/jsvectormap.css";
-// import "flatpickr/dist/flatpickr.min.css";
-// import "@/css/satoshi.css";
-import '@uploadthing/react/styles.css';
-import Providers from '@/components/Layouts/providers';
-import { Toaster } from '@/components/ui/toaster/toaster';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import "@/css/style.css";
-import React, { useEffect, useState } from "react";
-import Loader from "@/components/common/Loader";
-import { Inter } from 'next/font/google';
+import "./globals.css";
+
+import { Inter, Geist } from 'next/font/google';
+import { Metadata } from "next";
+
+import Providers from '@/components/layouts/providers';
+import { Toaster } from '@/components/ui/sonner';
+import RootLayoutClient from "./layoutClient";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const inter = Inter({ subsets: ['latin'] });
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  const [loading, setLoading] = useState<boolean>(true);
+export const metadata: Metadata = {
+  title: "Ventiqo | Your Ultimate Event Hub",
+  description: "Discover, plan, and elevate events with Ventiqo, the go-to platform for attendees and organizers alike. Explore a wide range of events, streamline event management, and create unforgettable experiences.",
+  keywords: "event management, event platform, ticket sales, event marketing, event promotion",
+};
 
-  useEffect(() => {
-    setTimeout(() => setLoading(false), 1000);
-  }, []);
-
+export default function RootLayout({ children }: Readonly<{children: React.ReactNode;}>) {
 
   return (
-    <html lang="en">
-      <body 
-       className={`${inter.className}`} 
-       suppressHydrationWarning={true}>
+    <html lang="en" className={cn("font-sans", geist.variable)} suppressHydrationWarning>
+      <body className={`${inter.className}`}>
         <Providers>
           <Toaster />
-          {loading ? <Loader /> : children}
+          <RootLayoutClient>{children}</RootLayoutClient>
         </Providers>
       </body>
     </html>

@@ -62,14 +62,11 @@ async function refreshAccessToken(): Promise<{ accessToken: string; refreshToken
       credentials: 'include', // Include cookies
     });
 
-    console.log(`Refresh token response: ${response.status} ${response.statusText}`);
-
     if (!response.ok) {
       throw new Error('Failed to refresh access token');
     }
 
     const data = await response.json();
-    console.log("New tokens received:", data);
 
     return {
       accessToken: data.accessToken,
@@ -105,12 +102,10 @@ const authConfig: NextAuthOptions = {
 
           if (!response.ok) {
             const errorData = await response.json();
-            console.error("Authentication error:", errorData);
             throw new Error(errorData.message || 'Authentication failed');
           }
 
           const data: AuthResponse = await response.json();
-          console.log("User logged in successfully:", data);
 
           if (data.success && data.user) {
             return {
@@ -146,6 +141,7 @@ const authConfig: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }: any) {
       if (user) {
+        token.sub = user.id
         token.accessToken = user.accessToken;
         token.refreshToken = user.refreshToken;
         token.user = {
@@ -158,18 +154,13 @@ const authConfig: NextAuthOptions = {
           phone_number: user.phone_number,
           role: user.role,
         };
-        console.log("JWT Callback: new token generated", token);
       } else {
-        console.log("JWT Callback: existing token", token);
-
         // Check if the token is expired
         if (isTokenExpired(token.accessToken) && token.refreshToken) {
-          console.log("JWT Callback: token expired, refreshing...");
           try {
             const refreshedToken = await refreshAccessToken();
             token.accessToken = refreshedToken.accessToken;
             token.refreshToken = refreshedToken.refreshToken || token.refreshToken;
-            console.log("JWT Callback: token refreshed", token);
           } catch (error) {
             console.error("JWT Callback: token refresh failed", error);
             token.error = "RefreshTokenError";
@@ -180,19 +171,15 @@ const authConfig: NextAuthOptions = {
     },
     async session({ session, token }: any) {
       session.user = token.user;
+      session.user.id = token.sub; // Include the user.id in the session
       session.accessToken = token.accessToken;
       session.refreshToken = token.refreshToken;
-
-      console.log("Session Callback: updated session", session);
       return session;
     },
   },
   events: {
     async signOut({ token }) {
       try {
-        console.log('Sign-out event triggered:', token);
-
-        // Ensure token or session details are passed correctly
         const accessToken = token?.accessToken;
 
         if (!accessToken) {
@@ -213,8 +200,6 @@ const authConfig: NextAuthOptions = {
         if (!response.ok) {
           console.error('Failed to sign out on the server:', response.status, response.statusText);
         } else {
-          console.log('Successfully signed out on the server');
-
           // Optionally, clear client-side session
           await nextAuthSignOut({ redirect: false });
         }
@@ -230,9 +215,8 @@ const authConfig: NextAuthOptions = {
     maxAge: 24 * 60 * 60, // 1 day
   },
   pages: {
-    signIn: "/auth/signin",
-    signOut: "/auth/signout",
-    verifyRequest: "/auth/verify-request",
+    signIn: "/sign-in",
+    verifyRequest: "/account-activation",
   },
 };
 
