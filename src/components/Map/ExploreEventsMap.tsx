@@ -1,4 +1,3 @@
-
 "use client"; 
 
 import { useEffect, useRef, useState, useMemo } from "react";
@@ -7,7 +6,7 @@ import mapboxgl from "mapbox-gl";
 import { MapPin, Calendar, Search, Music, Palette, Dribbble, Heart } from "lucide-react";
 import { createRoot } from "react-dom/client";
 
-import EventsUserViewForm from "../Forms/EventForms/events-user-view-form";
+import EventsUserViewForm from "../forms/event-forms/events-user-view-form";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAP_BOX_ACCESS_TOKEN || "";
 

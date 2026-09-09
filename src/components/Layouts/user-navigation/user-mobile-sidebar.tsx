@@ -1,5 +1,5 @@
 'use client';
-import { UserSidebarDashboardNav } from "@/components/Layouts/user-navigation/user-sidebar-dashboard-nav";
+import { UserSidebarDashboardNav } from "@/components/layouts/user-navigation/user-sidebar-dashboard-nav";
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { userNavItems } from '@/constants/data';
 import { MenuIcon } from 'lucide-react';

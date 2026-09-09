@@ -1,5 +1,5 @@
-import ThemeToggle from '@/components/Layouts/ThemeToggle/theme-toggle';
-import DropdownNotification from "@/components/Layouts/dropdown-notifications"
+import ThemeToggle from '@/components/layouts/ThemeToggle/theme-toggle';
+import DropdownNotification from "@/components/layouts/dropdown-notifications"
 import { UserMobileSidebar } from './user-mobile-sidebar';
 import { UserHeaderProfileNav } from './user-header-profile-nav';
 import { cn } from '@/lib/utils';

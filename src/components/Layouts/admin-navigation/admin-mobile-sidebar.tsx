@@ -1,5 +1,5 @@
 'use client';
-import { AdminSidebarDashboardNav } from '@/components/Layouts/admin-navigation/admin-sidebar-dashboard-nav'
+import { AdminSidebarDashboardNav } from '@/components/layouts/admin-navigation/admin-sidebar-dashboard-nav'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { navItems } from '@/constants/data';
 import { MenuIcon } from 'lucide-react';

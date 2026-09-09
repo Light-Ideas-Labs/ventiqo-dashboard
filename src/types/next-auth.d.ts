@@ -13,19 +13,18 @@ declare module 'next-auth' {
       last_name?: string;
       username?: string;
       phone_number?: string;
-      role?: string; 
+      role?: string;
        // Add your custom properties here
     };
   }
 
   interface User {
     id: string;
-    role?: string;  
+    role?: string;
     username?: string;
     first_name?: string;
     last_name?: string;
     phone_number?: string;
-    role?: string;
     // Add your custom properties here
   }
 }

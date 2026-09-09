@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { IconChevronsLeft } from "@tabler/icons-react";
 
-import { AdminSidebarDashboardNav } from "@/components/Layouts/admin-navigation/admin-sidebar-dashboard-nav";
+import { AdminSidebarDashboardNav } from "@/components/layouts/admin-navigation/admin-sidebar-dashboard-nav";
 import { useSidebar } from "@/hooks/useSidebar";
 import { navItems } from "@/constants/data";
 import { cn } from "@/lib/utils";
@@ -36,6 +36,7 @@ export default function AdminSidebar({ className }: SidebarProps) {
             alt="Ventiqo Logo"
             width={40}
             height={40}
+            className="brightness-0 filter"
           />
         </Link>
       </div>

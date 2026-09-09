@@ -5,14 +5,19 @@ import { usePathname } from 'next/navigation'; // Ensure this is correctly impor
 import { Dispatch, SetStateAction } from 'react';
 
 import { cn } from '@/lib/utils';
-import { TablerIcons } from '@/components/icons';
+import { Icons } from '@/components/icons';
 import { UserNavItem } from '@/types/nav-item';
 import { useSidebar } from '@/hooks/useSidebar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 // Type guard to check if a key exists in TablerIcons
-const isTablerIcon = (icon: string): icon is keyof typeof TablerIcons => {
-  return icon in TablerIcons;
+const isTablerIcon = (icon: string): icon is keyof typeof Icons => {
+  return icon in Icons;
+};
+
+// Type guard to check if the icon exists in Icons
+const isLucideIcon = (icon: string): icon is keyof typeof Icons => {
+  return icon in Icons;
 };
 
 interface DashboardNavProps {
@@ -38,7 +43,7 @@ export function UserSidebarDashboardNav({
       <TooltipProvider>
         {items.map((item, index) => {
           // Check if the icon is a valid Tabler icon
-          const IconComponent = item.icon && isTablerIcon(item.icon) ? TablerIcons[item.icon] : TablerIcons['apps']; // Fallback to 'apps' if icon is invalid
+          const IconComponent = item.icon && isLucideIcon(item.icon) ? Icons[item.icon] : Icons["dashboard"]; // Fallback to 'apps' if icon is invalid
           return (
             item.href && (
               <Tooltip key={index}>

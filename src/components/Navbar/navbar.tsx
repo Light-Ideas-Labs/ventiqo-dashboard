@@ -1,17 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-// import { RectangleStackIcon, UserCircleIcon, CommandLineIcon, Squares2X2Icon, XMarkIcon } from "@heroicons/react/24/solid"; // Bars3Icon
+import { MenuIcon } from "lucide-react";
+
+import ThemeToggle from '@/components/layouts/ThemeToggle/theme-toggle';
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 interface NavItemProps {
   children: React.ReactNode;
@@ -23,7 +18,7 @@ function NavItem({ children, href }: NavItemProps) {
     <li>
       <a
         href={href || "#"}
-        target={href ? "_blank" : "_self"}
+        // target={href ? "_blank" : "_self"}
         className="flex items-center gap-2 font-medium"
       >
         {children}
@@ -33,54 +28,27 @@ function NavItem({ children, href }: NavItemProps) {
 }
 
 const NAV_MENU = [
-  {
-    name: "Explore Events",
-    // icon: RectangleStackIcon,
-    href: "/events"
-  },
-  {
-    name: "About Us",
-    // icon: Squares2X2Icon,
-    href: "about-us",
-  },
-  {
-    name: "Pricing",
-    // icon: UserCircleIcon,
-    href: "/pricing",
-  },
-
-  {
-    name: "Docs",
-    // icon: CommandLineIcon,
-    href: "",
-  },
+  { name: "Home", href: "/" },
+  { name: "About Us", href: "/about-us" },
+  { name: "Explore Events", href: "/events" },
+  { name: "Pricing", href: "/pricing" },
+  { name: "Contact Us", href: "/#contact-us" },
 ];
 
 export function Navbar() {
-  const [open, setOpen] = React.useState(false);
   const [isScrolling, setIsScrolling] = React.useState(false);
-
-  const handleOpen = () => setOpen((cur) => !cur);
-
-  React.useEffect(() => {
-    window.addEventListener(
-      "resize",
-      () => window.innerWidth >= 960 && setOpen(false)
-    );
-  }, []);
+  const [isSheetOpen, setIsSheetOpen] = React.useState(false); // Explicit open state for the Sheet
 
   React.useEffect(() => {
     function handleScroll() {
-      if (window.scrollY > 0) {
-        setIsScrolling(true);
-      } else {
-        setIsScrolling(false);
-      }
+      setIsScrolling(window.scrollY > 0);
     }
 
     window.addEventListener("scroll", handleScroll);
 
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, []);
 
   return (
@@ -91,58 +59,67 @@ export function Navbar() {
     >
       <div className="container mx-auto flex items-center justify-between px-4 py-4">
         <Image
-            src={"/images/logo/ventiqo-white-logo.svg"}
-            alt="Ventiqo Logo"
-            width={40}
-            height={40}
-          />
-        <ul
-          className={`ml-10 hidden items-center gap-6 lg:flex ${
-            isScrolling ? "text-white" : "text-white"
-          }`}
-        >
-          {NAV_MENU.map(({ name,  href }) => ( // icon: Icon,
+          src={"/images/logo/ventiqo-white-logo.svg"}
+          alt="Ventiqo Logo"
+          width={45}
+          height={45}
+        />
+
+        {/* Desktop Navigation */}
+        <ul className="hidden lg:flex items-center gap-6">
+          {NAV_MENU.map(({ name, href }) => (
             <NavItem key={name} href={href}>
-              {/* <Icon className="h-5 w-5" /> */}
               <span>{name}</span>
             </NavItem>
           ))}
         </ul>
-        <div className="hidden items-center gap-4 lg:flex">
-          <Link  href="/auth/signin">
-            SignIn
+        <div className="hidden lg:flex items-center gap-3">
+          <Link
+            href="/sign-in"
+            className="rounded-full border border-white/70 px-5 py-1.5 text-sm font-medium transition hover:bg-white/10"
+          >
+            Login
           </Link>
-          <Link href="/auth/signup" target="_blank">
-            Get Started
+          <Link
+            href="/sign-up"
+            className="rounded-full bg-white px-5 py-1.5 text-sm font-medium text-[#2C7873] transition hover:bg-white/90"
+          >
+            Signup
           </Link>
+          <ThemeToggle />
         </div>
-        {/* <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" onClick={handleOpen} className="lg:hidden">
-              {open ? (
-                // <XMarkIcon strokeWidth={2} className="h-6 w-6" />
-              ) : (
-                // <Bars3Icon strokeWidth={2} className="h-6 w-6" />
-              )}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent side="bottom" align="start" className="w-[200px] mt-2">
-            {NAV_MENU.map(({ name, icon: Icon, href }) => (
-              <DropdownMenuItem key={name}>
-                <Icon className="h-5 w-5 mr-2" />
-                {name}
-              </DropdownMenuItem>
-            ))}
-            <div className="mt-4">
-              <Link  href="/auth/signin" className="w-full mb-2">
-                Log in
-              </Link>
-              <Link  href="/auth/signup" target="_blank" className="w-full">
-                Get Started
-              </Link>
+
+        {/* Mobile Menu Trigger */}
+        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+          <SheetTrigger asChild>
+            <button
+              className="lg:hidden"
+              onClick={() => setIsSheetOpen(true)}
+              aria-label="Open menu"
+            >
+              <MenuIcon className="w-6 h-6 text-white" />
+            </button>
+          </SheetTrigger>
+          <SheetContent side="right" className="px-4!">
+            <div className="space-y-6 py-6">
+              {/* Mobile Navigation */}
+              <ul className="space-y-4">
+                {NAV_MENU.map(({ name, href }) => (
+                  <li key={name}>
+                    <Link href={href} className="text-lg font-medium">
+                      {name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-4 space-y-2">
+                <Link href="/sign-in" className="block text-lg">Login</Link>
+                <Link href="/sign-up" className="block text-lg">Signup</Link>
+                <ThemeToggle />
+              </div>
             </div>
-          </DropdownMenuContent>
-        </DropdownMenu> */}
+          </SheetContent>
+        </Sheet>
       </div>
     </nav>
   );
