@@ -14,6 +14,9 @@ declare module 'next-auth' {
       username?: string;
       phone_number?: string;
       role?: string;
+      isPaid?: boolean;
+      nextPaymentAmount?: number;
+      nextPaymentDate?: string;
        // Add your custom properties here
     };
   }
