@@ -1,5 +1,4 @@
-import { Icons } from "@/components/icons";
-import { TablerIcons } from '@/components/icons';
+import { Icons, TablerIcons } from "@/components/icons";
 
 export interface NavItem {
   title: string;
