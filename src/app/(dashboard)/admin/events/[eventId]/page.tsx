@@ -22,7 +22,7 @@ import { eventSchema } from "@/lib/schemas";
 import TicketModal from "./TicketModal";
 import VenueModal from "./VenueModal";
 
-import { createEvent, getEventById, updateEvent } from "@/state/eventsAPI";
+import { createEvent, getEventById, updateEvent, type UpdateEventPayload } from "@/state/eventsAPI";
 import { fetchCategories, fetchSubcategories } from "@/state/categoriesAPI";
 import { openTicketModal, openVenueModal } from "@/state/eventEditorReducer";
 
@@ -198,7 +198,17 @@ const EventEditor = () => {
       };
 
       if (eventId) {
-        await updateEvent(eventId, formattedData);
+        const updatePayload: UpdateEventPayload = {
+          title: data.title,
+          date: data.date,
+          about: data.description,
+          tagline: formattedData.tagline,
+          keypoint: formattedData.keypoint.split(",").map((k) => k.trim()),
+          venueName: data.venue,
+          status: data.status,
+          categoryId: data.category,
+        };
+        await updateEvent(eventId, updatePayload);
       } else {
         await createEvent(formattedData);
       }
