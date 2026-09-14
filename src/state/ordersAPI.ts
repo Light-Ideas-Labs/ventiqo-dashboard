@@ -29,6 +29,15 @@ interface OrdersByEventResponse {
   data: Order[];
 }
 
+interface MyOrdersResponse {
+  message: string;
+  data: {
+    data: Order[];
+    pages: number;
+    total: number;
+  };
+}
+
 interface OrderMutationResponse {
   success: boolean;
   data?: Order;
@@ -64,6 +73,8 @@ export const fetchOrderById = async (orderId: string): Promise<Order> => {
 export const getOrdersByEvent = (eventId: string, status = "Paid") =>
   apiFetch<OrdersByEventResponse>(`/orders/event/${eventId}?status=${status}`);
 
+export const fetchMyOrders = () => apiFetch<MyOrdersResponse>("/orders/my/orders");
+
 export const checkInOrder = (orderId: string) =>
   apiFetch<OrderMutationResponse>(`/orders/${orderId}/check-in`, { method: "POST" });
 
@@ -74,6 +85,9 @@ export const resendOrderConfirmation = (orderId: string) =>
   apiFetch<OrderMutationResponse>(`/orders/${orderId}/resend`, { method: "POST" });
 
 // ── Query hooks ─────────────────────────────────────────────────────────
+export const useMyOrders = () =>
+  useQuery({ queryKey: [...orderKeys.all, "my"] as const, queryFn: fetchMyOrders });
+
 export const useOrdersByEvent = (eventId: string | undefined) =>
   useQuery({
     queryKey: orderKeys.byEvent(eventId ?? ""),

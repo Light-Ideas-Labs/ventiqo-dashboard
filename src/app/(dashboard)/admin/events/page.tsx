@@ -13,10 +13,11 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator, BreadcrumbWrapper } from '@/components/ui/breadcrumb';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import EventsTable from '@/components/tables/events-tables/event-table'; // Import the separated table component
+import EventsTable from '@/components/events/EventsTable';
 import { EventsSectionCards } from '@/components/statitiscs/events-sections-cards';
+import DataError from '@/components/shared/DataError';
 
-import { createEvent } from '@/state/eventsAPI';
+import { createEvent, useAllEvents } from '@/state/eventsAPI';
 
 // this for creating events
 interface dataEventDetails {
@@ -46,6 +47,8 @@ interface dataEventDetails {
 export default function Events() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const { data: eventsResponse, isLoading: eventsLoading, isError: eventsError, refetch: refetchEvents } = useAllEvents();
+  const events = eventsResponse?.events?.data ?? [];
 
   const handleCreateEvent = async () => {
     setLoading(true);
@@ -169,7 +172,13 @@ export default function Events() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <EventsTable /> {/* Use the separated EventsTable component */}
+                    {eventsError ? (
+                      <DataError message="Couldn't load events." onRetry={() => refetchEvents()} />
+                    ) : eventsLoading ? (
+                      <p className="py-8 text-center text-sm text-muted-foreground">Loading events…</p>
+                    ) : (
+                      <EventsTable events={events} />
+                    )}
                   </CardContent>
                   <CardFooter>
                     <div className="text-xs text-muted-foreground">
