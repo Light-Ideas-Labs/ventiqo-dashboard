@@ -20,6 +20,7 @@ export interface Order {
   pdfTicketURL?: string;
   checkIn: { status: boolean; at: string | null; by: string | null };
   event: string;
+  eventHistory?: { title: string; date: string; venueName?: string };
   createdAt: string;
   updatedAt: string;
 }
@@ -44,16 +45,29 @@ interface OrderMutationResponse {
   message?: string;
 }
 
+interface AllOrdersResponse {
+  data: {
+    order: Order[];
+    pages: number;
+    total: number;
+  };
+}
+
 // ── Query keys ──────────────────────────────────────────────────────────
 export const orderKeys = {
   all: ["orders"] as const,
   byEvent: (eventId: string) => [...orderKeys.all, "event", eventId] as const,
+  allPaginated: (page: number) => [...orderKeys.all, "all", page] as const,
 };
 
 // ── Fetchers ────────────────────────────────────────────────────────────
-// Attendee's own checkout flow — used by OrderFormPopup and the customer-facing
-// /user/orders/[orderId] page. Kept separate from the organizer-facing
-// fetchers below, which operate on an already-created order.
+// Platform-wide order list (admin-only, see routes/v1/orders.route.ts).
+export const getAllOrders = (page = 1, limit = 20) =>
+  apiFetch<AllOrdersResponse>(`/orders/all?page=${page}&limit=${limit}`);
+
+// Attendee's own checkout flow — used by the /chekout wizard and the
+// customer-facing /user/orders/[orderId] page. Kept separate from the
+// organizer-facing fetchers below, which operate on an already-created order.
 export const createOrder = (orderData: {
   eventId: string;
   ticketType: string;
@@ -87,6 +101,9 @@ export const resendOrderConfirmation = (orderId: string) =>
 // ── Query hooks ─────────────────────────────────────────────────────────
 export const useMyOrders = () =>
   useQuery({ queryKey: [...orderKeys.all, "my"] as const, queryFn: fetchMyOrders });
+
+export const useAllOrders = (page = 1, limit = 20) =>
+  useQuery({ queryKey: orderKeys.allPaginated(page), queryFn: () => getAllOrders(page, limit) });
 
 export const useOrdersByEvent = (eventId: string | undefined) =>
   useQuery({
