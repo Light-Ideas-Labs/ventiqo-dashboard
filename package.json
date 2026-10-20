@@ -4,7 +4,7 @@
   "private": true,
   "packageManager": "pnpm@10.9.0",
   "scripts": {
-    "dev": "next dev --webpack",
+    "dev": "next dev --webpack -p 3002",
     "dev:staging": "dotenv -e .env.staging -- next dev --webpack",
     "dev:sandbox": "dotenv -e .env.sandbox -- next dev --webpack",
     "build": "next build",
