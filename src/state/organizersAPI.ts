@@ -99,6 +99,28 @@ export const updateFinancialInfo = (organizerId: string, payload: FinancialInfoP
     body: payload,
   });
 
+// Admin-only: mark/unmark an organizer's settlement account as verified.
+export const verifyFinancialInfo = (organizerId: string) =>
+  apiFetch<{ success: boolean; financialInfo: FinancialInfo }>(`/organizers/${organizerId}/financial-info/verify`, {
+    method: "POST",
+  });
+
+export const rejectFinancialInfo = (organizerId: string) =>
+  apiFetch<{ success: boolean; financialInfo: FinancialInfo }>(`/organizers/${organizerId}/financial-info/reject`, {
+    method: "POST",
+  });
+
+export interface PendingFinancialVerification {
+  _id: string;
+  organizer_name: string;
+  organizer_email: string;
+  financialInfo: FinancialInfo;
+  createdAt: string;
+}
+
+export const getPendingFinancialVerifications = () =>
+  apiFetch<{ success: boolean; data: PendingFinancialVerification[] }>("/organizers/verification/pending");
+
 // ── Query hooks ─────────────────────────────────────────────────────────
 export const useMyOrganizer = () =>
   useQuery({
@@ -144,5 +166,33 @@ export const useUpdateFinancialInfo = () => {
       queryClient.invalidateQueries({
         queryKey: [...organizerKeys.detail(organizerId), "financial-info"],
       }),
+  });
+};
+
+export const usePendingFinancialVerifications = () =>
+  useQuery({
+    queryKey: ["organizers", "verification", "pending"] as const,
+    queryFn: getPendingFinancialVerifications,
+  });
+
+export const useVerifyFinancialInfo = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (organizerId: string) => verifyFinancialInfo(organizerId),
+    onSuccess: (_data, organizerId) => {
+      queryClient.invalidateQueries({ queryKey: [...organizerKeys.detail(organizerId), "financial-info"] });
+      queryClient.invalidateQueries({ queryKey: ["organizers", "verification", "pending"] });
+    },
+  });
+};
+
+export const useRejectFinancialInfo = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (organizerId: string) => rejectFinancialInfo(organizerId),
+    onSuccess: (_data, organizerId) => {
+      queryClient.invalidateQueries({ queryKey: [...organizerKeys.detail(organizerId), "financial-info"] });
+      queryClient.invalidateQueries({ queryKey: ["organizers", "verification", "pending"] });
+    },
   });
 };
