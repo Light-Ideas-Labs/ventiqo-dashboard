@@ -22,7 +22,7 @@ export const initiateMpesaPayment = (payload: MpesaPaymentPayload) =>
   apiFetch<MpesaPaymentResponse>("/payments/mpesa/stkpush", { method: "POST", body: payload });
 
 export const confirmMpesaPayment = (checkoutRequestId: string) =>
-  apiFetch<MpesaPaymentResponse>(`/confirmPayment/${checkoutRequestId}`);
+  apiFetch<MpesaPaymentResponse>(`/payments/confirmPayment/${checkoutRequestId}`, { method: "POST" });
 
 // ── Mutation hooks ──────────────────────────────────────────────────────
 export const useInitiateMpesaPayment = () =>

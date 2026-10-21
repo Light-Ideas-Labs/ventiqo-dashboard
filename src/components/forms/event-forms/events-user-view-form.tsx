@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { MapPin } from "lucide-react";
 import {
   Card,
@@ -11,7 +12,6 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import EventDetailsPopup from "@/components/forms/event-forms/event-details-popup";
-import OrderFormPopup from "../order-forms/OrderFormPopup";
 import { useAllEvents } from "@/state/eventsAPI";
 
 type Ticket = {
@@ -38,11 +38,9 @@ type Event = {
 };
 
 export default function EventsUserViewForm() {
+  const router = useRouter();
   const { data, isLoading: loading } = useAllEvents();
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [showOrderForm, setShowOrderForm] = useState<boolean>(false);
-  const [selectedTicketType, setSelectedTicketType] = useState<string | null>(null);
-  const [selectedEventForOrder, setSelectedEventForOrder] = useState<Event | null>(null);
 
   const events: Event[] = (data?.events.data ?? []).map((event: any) => {
     const longitude = event.coordinates?.longitude ?? 0;
@@ -75,13 +73,8 @@ export default function EventsUserViewForm() {
   };
 
   const handleGetTicketClick = (event: Event, ticketType: string) => {
-    setSelectedEventForOrder(event);
-    setSelectedTicketType(ticketType);
-    setShowOrderForm(true);
-  };
-
-  const handleCloseOrderForm = () => {
-    setShowOrderForm(false);
+    const params = new URLSearchParams({ eventId: event.id, ticketType });
+    router.push(`/chekout?${params.toString()}`);
   };
 
   if (loading) {
@@ -130,13 +123,6 @@ export default function EventsUserViewForm() {
       </div>
       {selectedEvent && (
         <EventDetailsPopup event={selectedEvent} onClose={handleClosePopup} onGetTicket={(ticketType) => handleGetTicketClick(selectedEvent, ticketType)} />
-      )}
-      {showOrderForm && selectedEventForOrder && (
-        <OrderFormPopup
-          eventId={selectedEventForOrder.id}
-          tickets={selectedEventForOrder.tickets}
-          onClose={handleCloseOrderForm}
-        />
       )}
     </div>
   );

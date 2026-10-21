@@ -86,9 +86,15 @@ export const navItems: NavItem[] = [
   },
   {
     title: 'Orders',
-    href: '/admin/order',
+    href: '/admin/orders',
     icon: 'shoppingCart',
     label: 'orders'
+  },
+  {
+    title: 'Payouts',
+    href: '/admin/payouts',
+    icon: 'billing',
+    label: 'payouts'
   },
   {
     title: 'Users',

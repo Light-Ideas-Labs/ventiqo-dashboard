@@ -61,7 +61,7 @@ export default function CheckoutDetailsPage() {
         <CardContent className="space-y-4">
           <div className="grid gap-2">
             <Label>Name</Label>
-            <Input value={session?.user?.name ?? ""} disabled />
+            <Input value={session?.user?.fullname ?? ""} disabled />
           </div>
           <div className="grid gap-2">
             <Label>Email</Label>

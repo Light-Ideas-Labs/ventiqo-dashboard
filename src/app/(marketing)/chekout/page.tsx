@@ -20,7 +20,7 @@ export default function CheckoutTicketsPage() {
   const { data: eventResponse, isLoading, isError } = useEvent(eventId);
   const event = eventResponse?.data;
 
-  const [ticketType, setTicketType] = useState<string>("");
+  const [ticketType, setTicketType] = useState<string>(searchParams.get("ticketType") ?? "");
   const [quantity, setQuantity] = useState(1);
 
   const selectedTicket = useMemo(
