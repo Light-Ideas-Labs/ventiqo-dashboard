@@ -491,7 +491,7 @@ const EventEditor = () => {
             </Card>
           </div>
           <TicketModal eventId={eventId ?? ""} />
-          <VenueModal />
+          <VenueModal eventId={eventId ?? ""} />
         </div>
       </div>
     </PageContainer>

@@ -2,18 +2,27 @@
 
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
-import { ShieldCheck, Info, CheckCircle2, Clock, AlertCircle } from "lucide-react"
+import { ShieldCheck, Info, CheckCircle2, Clock, AlertCircle, Wallet, Download, FileBadge } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { useMyOrganizer, useFinancialInfo, useUpdateFinancialInfo } from "@/state/organizersAPI"
+import { useKycStatus, useSubmitKyc, type KycStatus } from "@/state/kycAPI"
+import { useOrganizerWallet, useOrganizerSettlements, useRequestSettlement, downloadStatement } from "@/state/walletsAPI"
 import DataError from "@/components/shared/DataError"
 
 const STATUS_META = {
   unverified: { label: "Unverified", icon: AlertCircle, className: "bg-semantic-warning-bg text-semantic-warning-text" },
   pending: { label: "Pending review", icon: Clock, className: "bg-semantic-info-bg text-semantic-info-text" },
   verified: { label: "Verified", icon: CheckCircle2, className: "bg-semantic-success-bg text-semantic-success-text" },
+}
+
+const KYC_STATUS_META: Record<KycStatus, { label: string; icon: typeof AlertCircle; className: string }> = {
+  unsubmitted: { label: "Not submitted", icon: AlertCircle, className: "bg-semantic-warning-bg text-semantic-warning-text" },
+  pending: { label: "Pending review", icon: Clock, className: "bg-semantic-info-bg text-semantic-info-text" },
+  approved: { label: "Verified", icon: CheckCircle2, className: "bg-semantic-success-bg text-semantic-success-text" },
+  rejected: { label: "Rejected", icon: AlertCircle, className: "bg-semantic-error-bg text-semantic-error-text" },
 }
 
 export default function PaymentsPage() {
@@ -65,6 +74,71 @@ export default function PaymentsPage() {
 
   const status = financialInfo?.verificationStatus ?? "unverified"
   const statusMeta = STATUS_META[status]
+
+  // ── KYC (business verification) ──────────────────────────────────────
+  const { data: kycData } = useKycStatus(organizerId)
+  const submitKyc = useSubmitKyc()
+  const kyc = kycData?.data
+  const kycStatus: KycStatus = kyc?.status ?? "unsubmitted"
+  const kycStatusMeta = KYC_STATUS_META[kycStatus]
+  const canSubmitKyc = kycStatus === "unsubmitted" || kycStatus === "rejected"
+
+  const [idType, setIdType] = useState("")
+  const [idNumber, setIdNumber] = useState("")
+  const [businessType, setBusinessType] = useState("")
+
+  const handleSubmitKyc = async () => {
+    if (!organizerId) return
+    if (!idType || !idNumber) {
+      toast.error("ID type and ID number are required.")
+      return
+    }
+    try {
+      await submitKyc.mutateAsync({
+        organizerId,
+        payload: { country: "KE", idType, idNumber, businessType: businessType || undefined },
+      })
+      toast.success("KYC submitted", { description: "We'll review your business verification shortly." })
+    } catch (error) {
+      toast.error("Couldn't submit KYC", {
+        description: error instanceof Error ? error.message : "Please try again.",
+      })
+    }
+  }
+
+  // ── Wallet & settlements ────────────────────────────────────────────
+  const { data: walletData } = useOrganizerWallet(organizerId)
+  const { data: settlementsData } = useOrganizerSettlements(organizerId)
+  const requestSettlement = useRequestSettlement()
+  const [downloading, setDownloading] = useState(false)
+  const balances = walletData?.data?.balances
+  const settlements = settlementsData?.data ?? []
+
+  const handleRequestSettlement = async () => {
+    if (!organizerId) return
+    try {
+      await requestSettlement.mutateAsync(organizerId)
+      toast.success("Settlement requested", { description: "Your payout is now queued for processing." })
+    } catch (error) {
+      toast.error("Couldn't request settlement", {
+        description: error instanceof Error ? error.message : "Please try again.",
+      })
+    }
+  }
+
+  const handleDownloadStatement = async (format: "csv" | "pdf") => {
+    if (!organizerId) return
+    setDownloading(true)
+    try {
+      await downloadStatement(organizerId, format)
+    } catch (error) {
+      toast.error("Couldn't download statement", {
+        description: error instanceof Error ? error.message : "Please try again.",
+      })
+    } finally {
+      setDownloading(false)
+    }
+  }
 
   if (isError) {
     return (
@@ -159,6 +233,114 @@ export default function PaymentsPage() {
             <ShieldCheck className="size-3.5" /> Encrypted and Secure
           </div>
         </div>
+      </div>
+
+      {/* Business Verification (KYC) */}
+      <div className="rounded-2xl border border-border bg-card p-6">
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold">Business Verification</h2>
+            <p className="text-sm text-muted-foreground">
+              Required before you can request a settlement, alongside a verified payout account above.
+            </p>
+          </div>
+          <Badge className={`gap-1 border-0 ${kycStatusMeta.className}`}>
+            <kycStatusMeta.icon className="size-3.5" />
+            {kycStatusMeta.label}
+          </Badge>
+        </div>
+
+        {kycStatus === "rejected" && kyc?.rejectionReason && (
+          <div className="mb-4 flex gap-2 rounded-lg border border-semantic-error-bg-strong bg-semantic-error-bg p-3 text-xs text-semantic-error-text">
+            <AlertCircle className="mt-0.5 size-4 shrink-0" />
+            <p>{kyc.rejectionReason}</p>
+          </div>
+        )}
+
+        {kycStatus === "pending" && (
+          <p className="text-sm text-muted-foreground">
+            Your submission is awaiting review. We&apos;ll email you once it&apos;s been checked.
+          </p>
+        )}
+
+        {kycStatus === "approved" && (
+          <p className="text-sm text-muted-foreground">Your business is verified.</p>
+        )}
+
+        {canSubmitKyc && (
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Input value={idType} onChange={(e) => setIdType(e.target.value)} placeholder="ID type (e.g. BUSINESS_REGISTRATION)" />
+            <Input value={idNumber} onChange={(e) => setIdNumber(e.target.value)} placeholder="Registration / ID number" />
+            <Input
+              value={businessType}
+              onChange={(e) => setBusinessType(e.target.value)}
+              placeholder="Business type (optional)"
+              className="sm:col-span-2"
+            />
+            <Button onClick={handleSubmitKyc} disabled={submitKyc.isPending} className="sm:col-span-2 w-fit">
+              <FileBadge className="mr-1.5 size-4" />
+              {submitKyc.isPending ? "Submitting…" : "Submit for verification"}
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {/* Wallet & Payouts */}
+      <div className="rounded-2xl border border-border bg-card p-6">
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold">Wallet & Payouts</h2>
+            <p className="text-sm text-muted-foreground">Your ticket-revenue balance and settlement history.</p>
+          </div>
+          <Wallet className="size-5 text-muted-foreground" />
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+          {([
+            ["Available", balances?.available],
+            ["Pending", balances?.pending],
+            ["Reserved", balances?.reserved],
+            ["Held", balances?.held],
+            ["Settled", balances?.settled],
+          ] as const).map(([label, amount]) => (
+            <div key={label} className="rounded-lg border border-input p-3">
+              <p className="text-xs text-muted-foreground">{label}</p>
+              <p className="mt-1 text-lg font-semibold">KES {(amount ?? 0).toLocaleString()}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          <Button onClick={handleRequestSettlement} disabled={requestSettlement.isPending}>
+            {requestSettlement.isPending ? "Requesting…" : "Request Settlement"}
+          </Button>
+          <Button variant="outline" onClick={() => handleDownloadStatement("csv")} disabled={downloading}>
+            <Download className="mr-1.5 size-4" /> Statement (CSV)
+          </Button>
+          <Button variant="outline" onClick={() => handleDownloadStatement("pdf")} disabled={downloading}>
+            <Download className="mr-1.5 size-4" /> Statement (PDF)
+          </Button>
+        </div>
+
+        {settlements.length > 0 && (
+          <div className="mt-6">
+            <p className="mb-2 text-sm font-medium">Settlement history</p>
+            <div className="space-y-2">
+              {settlements.map((s) => (
+                <div key={s._id} className="flex items-center justify-between rounded-lg border border-input p-3 text-sm">
+                  <div>
+                    <p className="font-medium">KES {s.payoutAmount.toLocaleString()}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(s.createdAt).toLocaleDateString()} · Gross KES {s.grossAmount.toLocaleString()} · Reserve KES{" "}
+                      {s.reserveAmount.toLocaleString()}
+                    </p>
+                  </div>
+                  <Badge className="border-0 bg-semantic-success-bg text-semantic-success-text">Settled</Badge>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

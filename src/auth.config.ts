@@ -55,27 +55,61 @@ const isTokenExpired = (token: string | undefined): boolean => {
 };
 
 // Helper function to refresh access token
-async function refreshAccessToken(): Promise<{ accessToken: string; refreshToken: string }> {
-  try {
-    const response = await fetch(`${VentiqoBackendAPI}/auth/refresh-token`, {
-      method: 'GET',
-      credentials: 'include', // Include cookies
-    });
+//
+// The cookie-based GET /auth/refresh-token endpoint only works for real
+// browser requests - it reads req.cookies.refresh_token and responds with
+// just { success, message }, never the new tokens. This call runs
+// server-side (inside NextAuth's jwt() callback, i.e. Next.js server ->
+// backend), so there's no browser cookie jar on either end of that request.
+// POST /auth/refresh-token-mobile is the right fit instead: it takes the
+// refresh token in the request body and returns the new tokens in the JSON
+// body, with no cookie dependency at all.
+//
+// The backend rotates refresh tokens on every use (deletes the old one,
+// issues a new pair), so it's single-use. A page fires several concurrent
+// session checks (SessionProvider polling, multiple data hooks, etc.) -
+// when the token is expired, each of those independently calls jwt(), and
+// without de-duping they'd all race to redeem the SAME refresh token: one
+// wins, the rest get "Invalid refresh token" and - since a failed attempt
+// never updates token.refreshToken - that dead token is then stuck in the
+// session forever. inFlightRefreshes makes concurrent callers share one
+// in-flight request instead of racing.
+const inFlightRefreshes = new Map<string, Promise<{ accessToken: string; refreshToken: string }>>();
 
-    if (!response.ok) {
-      throw new Error('Failed to refresh access token');
+async function refreshAccessToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
+  const existing = inFlightRefreshes.get(refreshToken);
+  if (existing) return existing;
+
+  const promise = (async () => {
+    try {
+      const response = await fetch(`${VentiqoBackendAPI}/auth/refresh-token-mobile`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ refreshToken }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to refresh access token');
+      }
+
+      const data = await response.json();
+
+      return {
+        accessToken: data.accessToken,
+        refreshToken: data.refreshToken ?? '',
+      };
+    } catch (error) {
+      console.error('Error refreshing access token:', error);
+      throw error;
+    } finally {
+      inFlightRefreshes.delete(refreshToken);
     }
+  })();
 
-    const data = await response.json();
-
-    return {
-      accessToken: data.accessToken,
-      refreshToken: data.refreshToken ?? '',
-    };
-  } catch (error) {
-    console.error('Error refreshing access token:', error);
-    throw error;
-  }
+  inFlightRefreshes.set(refreshToken, promise);
+  return promise;
 }
 
 const authConfig: NextAuthOptions = {
@@ -158,7 +192,7 @@ const authConfig: NextAuthOptions = {
         // Check if the token is expired
         if (isTokenExpired(token.accessToken) && token.refreshToken) {
           try {
-            const refreshedToken = await refreshAccessToken();
+            const refreshedToken = await refreshAccessToken(token.refreshToken);
             token.accessToken = refreshedToken.accessToken;
             token.refreshToken = refreshedToken.refreshToken || token.refreshToken;
           } catch (error) {
