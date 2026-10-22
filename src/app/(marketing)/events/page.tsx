@@ -5,7 +5,7 @@ import Link from "next/link";
 import mapboxgl from "mapbox-gl"; // Import Mapbox GL
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MapPin, Calendar, Search, Music, Palette, Dribbble, Cpu } from "lucide-react"; // Icons for event details and categories
+import { MapPin, Calendar, Search, Music, Palette, Dribbble, Cpu, Info } from "lucide-react"; // Icons for event details and categories
 import { createRoot } from "react-dom/client";
 import Image from "next/image";
 import { useAllEvents } from "@/state/eventsAPI";
@@ -218,36 +218,40 @@ export default function ExploreEvents() {
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {popularEvents.map((event) => (
-              <Link
+              <div
                 key={event.id}
-                href={`/chekout?eventId=${event.id}`}
-                className="group block overflow-hidden rounded-xl bg-white shadow-md transition hover:shadow-lg"
+                className="group relative overflow-hidden rounded-xl bg-white shadow-md transition hover:shadow-lg"
               >
-                <div className="relative h-44 w-full">
-                  <Image src={event.image} alt={event.title} fill className="object-cover" />
-                </div>
-                <div className="p-3">
-                  <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                    <Calendar className="h-3.5 w-3.5" />
-                    <span>
-                      {event.dateLabel}
-                      {event.timeLabel ? ` · ${event.timeLabel}` : ""}
-                    </span>
+                <Link href={`/events/${event.id}`} aria-label="View details and reviews" title="View details and reviews" className="absolute right-2 top-2 z-10 rounded-full bg-black/60 p-1.5 text-white hover:bg-black/80">
+                  <Info className="h-3.5 w-3.5" />
+                </Link>
+                <Link href={`/chekout?eventId=${event.id}`} className="block">
+                  <div className="relative h-44 w-full">
+                    <Image src={event.image} alt={event.title} fill className="object-cover" />
                   </div>
-                  <h3 className="mt-1 truncate text-sm font-semibold text-gray-900">
-                    {event.title}
-                  </h3>
-                  <div className="mt-2 flex items-center justify-between gap-2">
-                    <div className="flex min-w-0 items-center gap-1 text-xs text-gray-500">
-                      <MapPin className="h-3.5 w-3.5 shrink-0" />
-                      <span className="truncate">{event.location}</span>
+                  <div className="p-3">
+                    <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                      <Calendar className="h-3.5 w-3.5" />
+                      <span>
+                        {event.dateLabel}
+                        {event.timeLabel ? ` · ${event.timeLabel}` : ""}
+                      </span>
                     </div>
-                    <span className="shrink-0 rounded-full bg-orange-100 px-2.5 py-1 text-xs font-semibold text-orange-600">
-                      {event.isFree ? "Free" : event.price !== undefined ? `KES ${event.price}` : "N/A"}
-                    </span>
+                    <h3 className="mt-1 truncate text-sm font-semibold text-gray-900">
+                      {event.title}
+                    </h3>
+                    <div className="mt-2 flex items-center justify-between gap-2">
+                      <div className="flex min-w-0 items-center gap-1 text-xs text-gray-500">
+                        <MapPin className="h-3.5 w-3.5 shrink-0" />
+                        <span className="truncate">{event.location}</span>
+                      </div>
+                      <span className="shrink-0 rounded-full bg-orange-100 px-2.5 py-1 text-xs font-semibold text-orange-600">
+                        {event.isFree ? "Free" : event.price !== undefined ? `KES ${event.price}` : "N/A"}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </Link>
+                </Link>
+              </div>
             ))}
           </div>
         )}

@@ -11,8 +11,9 @@ import OverviewTab from "@/components/events/workspace/OverviewTab"
 import SettingsTab from "@/components/events/workspace/SettingsTab"
 import AttendeesTab from "@/components/events/workspace/AttendeesTab"
 import SalesTab from "@/components/events/workspace/SalesTab"
+import ReviewsTab from "@/components/events/workspace/ReviewsTab"
 
-const TABS = ["overview", "attendees", "sales", "marketing", "checkin", "settings"] as const
+const TABS = ["overview", "attendees", "sales", "reviews", "marketing", "checkin", "settings"] as const
 type TabValue = (typeof TABS)[number]
 
 function EventWorkspaceContent() {
@@ -53,6 +54,7 @@ function EventWorkspaceContent() {
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="attendees">Attendees</TabsTrigger>
           <TabsTrigger value="sales">Sales</TabsTrigger>
+          <TabsTrigger value="reviews">Reviews</TabsTrigger>
           <TabsTrigger value="marketing">Marketing</TabsTrigger>
           <TabsTrigger value="checkin">Check-in</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
@@ -68,6 +70,10 @@ function EventWorkspaceContent() {
 
         <TabsContent value="sales">
           <SalesTab event={event} />
+        </TabsContent>
+
+        <TabsContent value="reviews">
+          <ReviewsTab event={event} />
         </TabsContent>
 
         <TabsContent value="marketing">
