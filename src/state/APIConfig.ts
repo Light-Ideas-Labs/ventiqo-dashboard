@@ -20,6 +20,7 @@ interface dataSignUpUser {
   username: string;
   email: string;
   password: string;
+  referralId?: string;
 }
 
 // ── Fetchers ────────────────────────────────────────────────────────────

@@ -4,15 +4,18 @@ import { toast } from "sonner"
 import { Copy, Gift, Info, Mail, MessageCircle } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { useMyOrganizer } from "@/state/organizersAPI"
+import { useMyReferral } from "@/state/referralsAPI"
 import DataError from "@/components/shared/DataError"
 
 export default function ReferralsPage() {
-  const { data: organizerData, isLoading, isError, refetch } = useMyOrganizer()
-  const organizer = organizerData?.data
+  const { data, isLoading, isError, refetch } = useMyReferral()
+  const referralId = data?.data.referralId
   const origin = typeof window !== "undefined" ? window.location.origin : ""
 
-  const referralLink = organizer && origin ? `${origin}/sign-up?ref=${organizer._id}` : ""
+  // referralId identifies a real, server-tracked Referral record - whoever
+  // signs up through this link gets recorded as this user's invitee (see
+  // POST /referrals/generate and /auth/activate-user-account on the backend)
+  const referralLink = referralId && origin ? `${origin}/sign-up?ref=${referralId}` : ""
 
   const copyLink = () => {
     if (!referralLink) return
@@ -25,7 +28,7 @@ export default function ReferralsPage() {
   const shareText = `Come organize events with me on Ventiqo — sign up here: ${referralLink}`
 
   if (isError) {
-    return <DataError message="Couldn't load your organizer profile." onRetry={() => refetch()} />
+    return <DataError message="Couldn't load your referral link." onRetry={() => refetch()} />
   }
 
   return (
@@ -83,8 +86,8 @@ export default function ReferralsPage() {
         <div className="flex gap-2 rounded-lg border border-semantic-info-bg-strong bg-semantic-info-bg p-3 text-xs text-semantic-info-text">
           <Info className="mt-0.5 size-4 shrink-0" />
           <p>
-            Your link works and can be shared today. Referral rewards and a history of who signed up through it aren&apos;t
-            tracked yet — that&apos;s coming in a future update.
+            Anyone who signs up through this link and verifies their email is recorded as your referral. A history of who
+            signed up through it isn&apos;t shown here yet — that&apos;s coming in a future update.
           </p>
         </div>
       </div>
