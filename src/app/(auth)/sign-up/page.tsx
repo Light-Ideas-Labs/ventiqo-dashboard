@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react";
+import React, { Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import UserSignUpForm from "@/components/forms/auth-forms/user-signup-form"
@@ -72,7 +72,9 @@ const SignUp: React.FC = () => {
               Enter your email below to create your account
             </p>
           </div>
-          < UserSignUpForm/>
+          <Suspense fallback={null}>
+            <UserSignUpForm />
+          </Suspense>
           <p className="px-8 text-center text-sm text-muted-foreground">
             By clicking continue, you agree to our{' '}
             <Link

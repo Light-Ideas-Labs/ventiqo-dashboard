@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { uniqueNamesGenerator, adjectives, colors, animals } from 'unique-names-generator'; // Import unique-names-generator
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import axios from "axios";
@@ -50,6 +50,8 @@ export default function UserSignUpForm() {
   const [country, setCountry] = useState<string>("");
 
   const router = useRouter(); // Use Next.js router for redirect
+  const searchParams = useSearchParams();
+  const referralId = searchParams.get("ref") ?? undefined;
 
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] =  useState<boolean>(false);
@@ -101,8 +103,8 @@ export default function UserSignUpForm() {
   const onSubmit = async (data: SignupFormInputs) => {
     setLoading(true);
     try {
-      // Include country in the data
-      const { confirm_password, ...userData } = { ...data, country };
+      // Include country (and referralId, if the user arrived via a referral link) in the data
+      const { confirm_password, ...userData } = { ...data, country, referralId };
       const response = await signUpUser(userData);
       const token = response.activationToken; // Assume the token is returned from the API
 
